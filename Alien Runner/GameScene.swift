@@ -9,14 +9,17 @@
 import SpriteKit
 
 class GameScene: SKScene {
+    
+    var map: JSTileMap!
+    
     override func didMoveToView(view: SKView) {
         /* Setup your scene here */
-        let myLabel = SKLabelNode(fontNamed:"Chalkduster")
-        myLabel.text = "Hello, World!";
-        myLabel.fontSize = 65;
-        myLabel.position = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame));
+
+        self.backgroundColor = SKColor(red: 0.81, green: 0.91, blue: 0.96, alpha: 1.0)
         
-        self.addChild(myLabel)
+        // Load level
+        map = JSTileMap(named: "Level1.tmx")
+        self.addChild(map)
     }
     
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
@@ -24,18 +27,7 @@ class GameScene: SKScene {
         
         for touch: AnyObject in touches {
             let location = touch.locationInNode(self)
-            
-            let sprite = SKSpriteNode(imageNamed:"Spaceship")
-            
-            sprite.xScale = 0.5
-            sprite.yScale = 0.5
-            sprite.position = location
-            
-            let action = SKAction.rotateByAngle(CGFloat(M_PI), duration:1)
-            
-            sprite.runAction(SKAction.repeatActionForever(action))
-            
-            self.addChild(sprite)
+
         }
     }
    
