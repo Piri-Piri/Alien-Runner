@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6367E97F1A0D69CF00ADC69E /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6367E97E1A0D69CF00ADC69E /* Player.swift */; };
 		63F233711A0CAB9200DD5450 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F233701A0CAB9200DD5450 /* AppDelegate.swift */; };
 		63F233731A0CAB9200DD5450 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 63F233721A0CAB9200DD5450 /* GameScene.sks */; };
 		63F233751A0CAB9200DD5450 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F233741A0CAB9200DD5450 /* GameScene.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6367E97E1A0D69CF00ADC69E /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		63F2336B1A0CAB9200DD5450 /* Alien Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Alien Runner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		63F2336F1A0CAB9200DD5450 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		63F233701A0CAB9200DD5450 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -106,16 +108,17 @@
 		63F2336D1A0CAB9200DD5450 /* Alien Runner */ = {
 			isa = PBXGroup;
 			children = (
-				63F233AE1A0CEBF100DD5450 /* ThirdParty */,
-				63F233701A0CAB9200DD5450 /* AppDelegate.swift */,
-				63F233721A0CAB9200DD5450 /* GameScene.sks */,
 				63F233A81A0CE91800DD5450 /* Graphics.atlas */,
 				63F2339D1A0CE8F500DD5450 /* Maps */,
+				63F233701A0CAB9200DD5450 /* AppDelegate.swift */,
+				63F233721A0CAB9200DD5450 /* GameScene.sks */,
 				63F233741A0CAB9200DD5450 /* GameScene.swift */,
 				63F233761A0CAB9200DD5450 /* GameViewController.swift */,
+				6367E97E1A0D69CF00ADC69E /* Player.swift */,
 				63F233781A0CAB9200DD5450 /* Main.storyboard */,
 				63F2337B1A0CAB9200DD5450 /* Images.xcassets */,
 				63F2337D1A0CAB9200DD5450 /* LaunchScreen.xib */,
+				63F233AE1A0CEBF100DD5450 /* ThirdParty */,
 				63F2336E1A0CAB9200DD5450 /* Supporting Files */,
 			);
 			path = "Alien Runner";
@@ -284,6 +287,7 @@
 				63F2339A1A0CE75900DD5450 /* JSTileMap.m in Sources */,
 				63F233771A0CAB9200DD5450 /* GameViewController.swift in Sources */,
 				63F233AC1A0CE9B400DD5450 /* SoundManager.m in Sources */,
+				6367E97F1A0D69CF00ADC69E /* Player.swift in Sources */,
 				63F233971A0CE73000DD5450 /* LFCGzipUtility.m in Sources */,
 				63F233711A0CAB9200DD5450 /* AppDelegate.swift in Sources */,
 			);
@@ -486,6 +490,7 @@
 				63F233901A0CAB9200DD5450 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		63F233911A0CAB9200DD5450 /* Build configuration list for PBXNativeTarget "Alien RunnerTests" */ = {
 			isa = XCConfigurationList;
@@ -494,6 +499,7 @@
 				63F233931A0CAB9200DD5450 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
