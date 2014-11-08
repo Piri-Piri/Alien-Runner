@@ -8,27 +8,70 @@
 
 import UIKit
 
+enum PlayerState: Int {
+    case Running = 0
+    case Jumping
+    case Hurt
+}
+
 class Player: SKSpriteNode {
     
     let kGravity: CGFloat = -0.24
     let kAcceleration: CGFloat = 0.07
-    let kMaxSpeed: CGFloat = 3.0
+    let kMaxSpeed: CGFloat = 0.0
     let kJumpSpeed: CGFloat = 5.5
     let kJumpCutOffSpeed: CGFloat = 2.5
-    let kShowCollisionRect = false
+    let kShowCollisionRect = true
     
     var velocity: CGVector = CGVectorMake(0, 0)
     var targetPosition: CGPoint = CGPointZero
     var didJump: Bool = false
     var onGround: Bool = false
-    var gravityMultiplier: CGFloat = 1
+    var gravityMultiplier: CGFloat = 1 {
+        didSet {
+            // Set the texture orientation to match the pull of gravity
+            self.yScale = gravityMultiplier
+        }
+    }
+    var currentState: PlayerState = .Running {
+        didSet {
+            if currentState != oldValue {
+                if oldValue == .Running {
+                    self.removeActionForKey("Run")
+                }
+                
+                switch currentState {
+                case .Running:
+                    self.runAction(runningAnimation, withKey: "Run")
+                case .Jumping:
+                    self.texture = SKTexture(imageNamed: "p1_jump")
+                case .Hurt:
+                    self.texture = SKTexture(imageNamed: "p1_hurt")
+                default:
+                    println("Error: invalid player state: \(currentState)")
+                }
+            }
+        }
+    }
     
     private var didJumpPrevious: Bool = false
     private var canFlipGravity: Bool = false
+    private var runningAnimation: SKAction!
     
     override init() {
         let player = SKTexture(imageNamed: "p1_walk01")
         super.init(texture: player, color: UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0), size: player.size())
+        
+        // Create array for frames for run animation
+        var walkFrames = NSMutableArray()
+        for var i = 1; i < 12; i++ {
+            let frame = SKTexture(imageNamed: String(format: "p1_walk%02d", i))
+            
+            walkFrames.addObject(frame)
+        }
+        
+        let animation = SKAction.animateWithTextures(walkFrames, timePerFrame: (1.0/15.0), resize: false, restore: false)
+        self.runningAnimation = SKAction.repeatActionForever(animation)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -39,11 +82,32 @@ class Player: SKSpriteNode {
         return self.gravityMultiplier == -1
     }
     
+    
+    func collisionRecAtTarget() -> CGRect {
+        // Calculate smaller rectangle
+        /*
+            // The size of the frame property is smaller than size property due empty pixel are remove by spritekit
+            var collisionRect: CGRect = CGRectInset(self.frame, 4, 2)
+        */
+        var collisionRect: CGRect = CGRectMake(targetPosition.x - (size.width * anchorPoint.x) + 4, targetPosition.y - (size.height * anchorPoint.y), size.width - 8, size.height - 4)
+        
+        if gravityFlipped() {
+            // Move the rectangle up because the bottom is now at the top in parent coords
+            collisionRect.origin.y += 4
+        }
+        
+        return collisionRect
+    }
+    
     func update() {
         if kShowCollisionRect {
             self.removeAllChildren()
             let box = SKShapeNode()
-            box.path = CGPathCreateWithRect(collisionRecAtTarget(), nil)
+            var rect: CGRect = collisionRecAtTarget()
+            if gravityFlipped() {
+                rect.origin.y -= 4
+            }
+            box.path = CGPathCreateWithRect(rect, nil)
             box.strokeColor = SKColor.redColor()
             box.lineWidth = 0.1
             box.position = CGPointMake(-targetPosition.x, -targetPosition.y)
@@ -59,6 +123,10 @@ class Player: SKSpriteNode {
         // Prevent ability to flip gravity when player lands on the grounds
         if onGround {
             canFlipGravity = false
+            currentState = .Running
+        }
+        else {
+            currentState = .Jumping
         }
         
         if didJump && !didJumpPrevious {
@@ -98,16 +166,4 @@ class Player: SKSpriteNode {
         // Track previous jump state
         self.didJumpPrevious = self.didJump
     }
-    
-    func collisionRecAtTarget() -> CGRect {
-        // Calculate smaller rectangle based on frame
-        var collisionRect: CGRect = CGRectInset(self.frame, 4, 2)
-        
-        // Move rectangle to target position
-        let movement = CGPointMake(targetPosition.x - position.x, targetPosition.y - position.y)
-        collisionRect = CGRectOffset(collisionRect, movement.x, movement.y - 2)
-        
-        return collisionRect
-    }
-    
 }
