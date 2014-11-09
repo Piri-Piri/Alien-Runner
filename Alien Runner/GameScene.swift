@@ -12,6 +12,7 @@ class GameScene: SKScene {
     
     var map: JSTileMap!
     var mainLayer: TMXLayer!
+    var obstacleLayer: TMXLayer!
     var camera: SKNode!
     var player: Player!
     
@@ -23,6 +24,7 @@ class GameScene: SKScene {
         // Load level
         map = JSTileMap(named: "Level1.tmx")
         mainLayer = map.layerNamed("Main")
+        obstacleLayer = map.layerNamed("Obstacles")
         self.addChild(map)
         
         // Setup camera
@@ -34,8 +36,6 @@ class GameScene: SKScene {
         player = Player()
         player.position = getMarkerPosition("Player")
         map.addChild(player)
-        
-        
     }
 
     func getMarkerPosition(markerName: String) -> CGPoint {
@@ -54,6 +54,17 @@ class GameScene: SKScene {
         return position
     }
     
+    func gameOver() {
+        if let skView = self.view {
+            skView.presentScene(MainMenuScene(size: self.size))
+        }
+//        player.position = getMarkerPosition("Player")
+//        player.velocity = CGVectorMake(0, 0)
+//        player.gravityMultiplier = 1
+//        player.currentState = .Jumping
+        
+    }
+    
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
         player.didJump = true
     }
@@ -70,9 +81,7 @@ class GameScene: SKScene {
     
     override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
         if touches.anyObject()?.locationInNode(self).x < 50 {
-            player.position = getMarkerPosition("Player")
-            player.velocity = CGVectorMake(0, 0)
-            player.gravityMultiplier = 1
+            gameOver()
         }
         player.didJump = false
     }
@@ -98,15 +107,19 @@ class GameScene: SKScene {
         return CGRectMake(x, y, map.tileSize.width, map.tileSize.height)
     }
    
-    func collide(player: Player, withLayer layer: TMXLayer) {
+    func collide(player: Player, withLayer layer: TMXLayer, resolveWithMove movePlayer: Bool) -> Bool {
         // Create coordinate offsets for tiles to check
         let coordOffsets: [CGPoint] = [CGPointMake(0, 1), CGPointMake(0, -1), CGPointMake(1, 0), CGPointMake(-1, 0), CGPointMake(1, -1), CGPointMake(-1, -1), CGPointMake(1, 1), CGPointMake(-1, 1)]
         
         // Get tile grid coord for players position
         let playerCoord = layer.coordForPoint(player.targetPosition)
         
-        // Set on ground to false by default
-        player.onGround = false
+        var collision = false
+        
+        if movePlayer {
+            // Set on ground to false by default
+            player.onGround = false
+        }
         
         // Looping through the tiles
         for var i = 0; i < 8; i++ {
@@ -127,34 +140,42 @@ class GameScene: SKScene {
                 let intersection: CGRect = CGRectIntersection(playerRect, rectForTileCoord(tileCoord))
                 
                 if !CGRectIsEmpty(intersection) {
-                    // Do we move the player horizontally or vertically
-                    let resolveVertically: Bool = offset.x == 0 || (offset.y != 0 && intersection.size.height < intersection.size.width)
+                    // We have a collision
+                    collision = true
                     
-                    var positionAdjustment = CGPointZero
-                    if resolveVertically {
-                        // Calculate the distance we need to move the player
-                        positionAdjustment.y = intersection.size.height * offset.y
-                        // Stop player moving vertically
-                        player.velocity = CGVectorMake(player.velocity.dx, 0)
+                    if movePlayer {
+                        // Do we move the player horizontally or vertically
+                        let resolveVertically: Bool = offset.x == 0 || (offset.y != 0 && intersection.size.height < intersection.size.width)
                         
-                        //
-                        if offset.y == player.gravityMultiplier {
-                            // Player is touching the ground
-                            player.onGround = true
+                        var positionAdjustment = CGPointZero
+                        if resolveVertically {
+                            // Calculate the distance we need to move the player
+                            positionAdjustment.y = intersection.size.height * offset.y
+                            // Stop player moving vertically
+                            player.velocity = CGVectorMake(player.velocity.dx, 0)
+                            
+                            //
+                            if offset.y == player.gravityMultiplier {
+                                // Player is touching the ground
+                                player.onGround = true
+                            }
                         }
+                        else {
+                            positionAdjustment.x = intersection.size.width * -offset.x
+                            // Stop player moving horizontally
+                            player.velocity = CGVectorMake(0, player.velocity.dy)
+                        }
+                        
+                        player.targetPosition = CGPointMake(player.targetPosition.x + positionAdjustment.x, player.targetPosition.y + positionAdjustment.y)
                     }
                     else {
-                        positionAdjustment.x = intersection.size.width * -offset.x
-                        // Stop player moving horizontally
-                        player.velocity = CGVectorMake(0, player.velocity.dy)
+                        // We have encountered a collision but do not need to move, so no point continuing
+                        return true
                     }
-                    
-                    player.targetPosition = CGPointMake(player.targetPosition.x + positionAdjustment.x, player.targetPosition.y + positionAdjustment.y)
                 }
             }
         }
-        
-        
+        return collision
     }
     
     override func update(currentTime: CFTimeInterval) {
@@ -163,11 +184,27 @@ class GameScene: SKScene {
         // Update player
         player.update()
         
-        // Collide player with the world
-        collide(player, withLayer: mainLayer)
-        
-        // Move player
-        player.position = player.targetPosition
+        // Check if the player is falling out of the world
+        if player.targetPosition.y < -player.size.height * 2
+            || player.targetPosition.y > (map.mapSize.height * map.tileSize.height) + player.size.height * 2 {
+            // Fall outside of the world
+            gameOver()
+        }
+        else {
+            if player.currentState != .Hurt {
+                // Collide player with the world
+                collide(player, withLayer: mainLayer, resolveWithMove: true)
+                
+                // Collide player with obstacles
+                var collision = collide(player, withLayer: obstacleLayer, resolveWithMove: false)
+                if collision {
+                    player.kill()
+                }
+            }
+
+            // Move player
+            player.position = player.targetPosition
+        }
         
         // Update position of camera
         camera.position = CGPointMake(player.position.x + (self.frame.size.width * 0.25), player.position.y)

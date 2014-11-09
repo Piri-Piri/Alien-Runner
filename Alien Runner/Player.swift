@@ -18,7 +18,7 @@ class Player: SKSpriteNode {
     
     let kGravity: CGFloat = -0.24
     let kAcceleration: CGFloat = 0.07
-    let kMaxSpeed: CGFloat = 0.0
+    let kMaxSpeed: CGFloat = 3.5
     let kJumpSpeed: CGFloat = 5.5
     let kJumpCutOffSpeed: CGFloat = 2.5
     let kShowCollisionRect = true
@@ -72,6 +72,7 @@ class Player: SKSpriteNode {
         
         let animation = SKAction.animateWithTextures(walkFrames, timePerFrame: (1.0/15.0), resize: false, restore: false)
         self.runningAnimation = SKAction.repeatActionForever(animation)
+        self.runAction(runningAnimation, withKey: "Run")
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -80,6 +81,11 @@ class Player: SKSpriteNode {
     
     func gravityFlipped() -> Bool {
         return self.gravityMultiplier == -1
+    }
+    
+    func kill() {
+        currentState = .Hurt
+        velocity = CGVectorMake(0, kJumpSpeed * kGravity)
     }
     
     
@@ -117,43 +123,45 @@ class Player: SKSpriteNode {
         // Apply gravity 
         velocity = CGVectorMake(velocity.dx, velocity.dy + kGravity * gravityMultiplier)
         
-        // Apply acceleration
-        velocity = CGVectorMake(fmin(kMaxSpeed, velocity.dx + kAcceleration), velocity.dy)
-        
-        // Prevent ability to flip gravity when player lands on the grounds
-        if onGround {
-            canFlipGravity = false
-            currentState = .Running
-        }
-        else {
-            currentState = .Jumping
-        }
-        
-        if didJump && !didJumpPrevious {
-            // Starting a jump
+        if currentState != .Hurt {
+            // Apply acceleration
+            velocity = CGVectorMake(fmin(kMaxSpeed, velocity.dx + kAcceleration), velocity.dy)
+            
+            // Prevent ability to flip gravity when player lands on the grounds
             if onGround {
-                // Perform jump
-                velocity = CGVectorMake(velocity.dx, kJumpSpeed * gravityMultiplier)
-                // Set ability to flip gravity
-                canFlipGravity = true
-            }
-            else if canFlipGravity {
-                // Flip gravity
-                gravityMultiplier *= -1
-                // Prevent further flips until next jump
                 canFlipGravity = false
-            }
-        }
-        else if !didJump {
-            // Cancel jump
-            if gravityFlipped() {
-                if velocity.dy < -kJumpCutOffSpeed {
-                    velocity = CGVectorMake(velocity.dx, -kJumpCutOffSpeed)
-                }
+                currentState = .Running
             }
             else {
-                if velocity.dy > kJumpCutOffSpeed {
-                    velocity = CGVectorMake(velocity.dx, kJumpCutOffSpeed)
+                currentState = .Jumping
+            }
+            
+            if didJump && !didJumpPrevious {
+                // Starting a jump
+                if onGround {
+                    // Perform jump
+                    velocity = CGVectorMake(velocity.dx, kJumpSpeed * gravityMultiplier)
+                    // Set ability to flip gravity
+                    canFlipGravity = true
+                }
+                else if canFlipGravity {
+                    // Flip gravity
+                    gravityMultiplier *= -1
+                    // Prevent further flips until next jump
+                    canFlipGravity = false
+                }
+            }
+            else if !didJump {
+                // Cancel jump
+                if gravityFlipped() {
+                    if velocity.dy < -kJumpCutOffSpeed {
+                        velocity = CGVectorMake(velocity.dx, -kJumpCutOffSpeed)
+                    }
+                }
+                else {
+                    if velocity.dy > kJumpCutOffSpeed {
+                        velocity = CGVectorMake(velocity.dx, kJumpCutOffSpeed)
+                    }
                 }
             }
         }
