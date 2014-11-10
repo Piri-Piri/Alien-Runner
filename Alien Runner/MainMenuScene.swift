@@ -8,7 +8,32 @@
 
 import UIKit
 
+enum MenuMode: Int {
+    case Home
+    case LevelFailed
+    case LevelCompleted
+}
+
 class MainMenuScene: SKScene {
+    
+    var title: SKLabelNode!
+    var playButton: Button!
+    
+    var mode: MenuMode = .Home {
+        didSet {
+            switch mode {
+            case .LevelFailed:
+                title.text = "Game Over"
+                playButton.texture = SKTexture(imageNamed: "ButtonAgain")
+            case .LevelCompleted:
+                title.text = "Level completed"
+                playButton.texture = SKTexture(imageNamed: "ButtonPlay")
+            default:
+                title.text = "Alien Runner"
+                playButton.texture = SKTexture(imageNamed: "ButtonPlay")
+            }
+        }
+    }
     
     override init(size: CGSize) {
         super.init(size: size)
@@ -20,7 +45,7 @@ class MainMenuScene: SKScene {
         self.backgroundColor = SKColor(red: 0.16, green: 0.27, blue: 0.3, alpha: 1.0)
         
         // Setup title node
-        let title = SKLabelNode(fontNamed: "Futura")
+        title = SKLabelNode(fontNamed: "Futura")
         title.text = "Alien Runner"
         title.fontColor = SKColor(red: 0.518, green: 0.78, blue: 1.0, alpha: 1.0)
         title.fontSize = 40
@@ -43,7 +68,7 @@ class MainMenuScene: SKScene {
         
         // Setup play button
         let playButtonTexture = SKTexture(imageNamed: "ButtonPlay")
-        let playButton = Button(texture: playButtonTexture, color: UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0), size: playButtonTexture.size())
+        playButton = Button(texture: playButtonTexture, color: UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0), size: playButtonTexture.size())
         playButton.position = CGPointMake(size.width * 0.5 - 55, 90)
         playButton.setPressedAction(pressedPlayButton)
         playButton.pressedSound = Sound(named: "Click.caf")
