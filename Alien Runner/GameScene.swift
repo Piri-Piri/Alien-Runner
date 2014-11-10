@@ -13,6 +13,7 @@ class GameScene: SKScene {
     var map: JSTileMap!
     var mainLayer: TMXLayer!
     var obstacleLayer: TMXLayer!
+    var backgroundLayer: TMXLayer!
     var camera: SKNode!
     var player: Player!
     
@@ -21,10 +22,15 @@ class GameScene: SKScene {
 
         self.backgroundColor = SKColor(red: 0.81, green: 0.91, blue: 0.96, alpha: 1.0)
         
+        // Get selected level
+        let selectedLevel = NSUserDefaults.standardUserDefaults().integerForKey(kSelectedLevelKey)
+        let levelName = "Level\(selectedLevel).tmx"
+        
         // Load level
-        map = JSTileMap(named: "Level1.tmx")
+        map = JSTileMap(named: levelName)
         mainLayer = map.layerNamed("Main")
         obstacleLayer = map.layerNamed("Obstacles")
+        backgroundLayer = map.layerNamed("Background")
         self.addChild(map)
         
         // Setup camera
@@ -69,9 +75,20 @@ class GameScene: SKScene {
             }
             NSUserDefaults.standardUserDefaults().synchronize()
         }
+        let mainMenu = MainMenuScene(size: self.size)
+        if completedLevel {
+            // Play completion sound
+            /* *** Placehoder for sound *** */
+            mainMenu.mode = .LevelCompleted
+        }
+        else {
+            // Play failure sound
+            /* *** Placehoder for sound *** */
+            mainMenu.mode = .LevelFailed
+        }
         
         if let skView = self.view {
-            skView.presentScene(MainMenuScene(size: self.size))
+            skView.presentScene(mainMenu)
         }
     }
     
@@ -230,12 +247,15 @@ class GameScene: SKScene {
         x = fmin(x, map.mapSize.width * map.tileSize.width - (self.frame.size.width * 0.5))
         y = fmin(y, map.mapSize.height * map.tileSize.height - (self.frame.size.height * 0.5))
         
-        // Align x and to pixel grid
+        // Align x and y to pixel grid by rounding floats to whole numbers
         x = round(x * 2) / 2
         y = round(y * 2) / 2
         
         // Center view on position of camera in the world
         map.position = CGPointMake((self.frame.size.width * 0.5) - x, (self.frame.size.height * 0.5) - y)
+        
+        // Parallax scroll the background layer
+        backgroundLayer.position = CGPointMake(map.position.x * -0.2, map.position.y * -0.2)
     }
     
 }
