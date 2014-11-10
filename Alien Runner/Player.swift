@@ -18,7 +18,7 @@ class Player: SKSpriteNode {
     
     let kGravity: CGFloat = -0.24
     let kAcceleration: CGFloat = 0.07
-    let kMaxSpeed: CGFloat = 3.5
+    let kMaxSpeed: CGFloat = 3.0
     let kJumpSpeed: CGFloat = 5.5
     let kJumpCutOffSpeed: CGFloat = 2.5
     
@@ -43,10 +43,20 @@ class Player: SKSpriteNode {
                 
                 switch currentState {
                 case .Running:
+                    // Play landing sound
+                    /* *** Placehoder for sound *** */
                     self.runAction(runningAnimation, withKey: "Run")
+                    // Play run sound (loop)
+                    /* *** Placehoder for sound *** */
                 case .Jumping:
+                    // Play jump sound
+                    /* *** Placehoder for sound *** */
                     self.texture = SKTexture(imageNamed: "p1_jump")
+                    // Stop run sound (loop)
+                    /* *** Placehoder for sound *** */
                 case .Hurt:
+                    // Play hurt sound
+                    /* *** Placehoder for sound *** */
                     self.texture = SKTexture(imageNamed: "p1_hurt")
                 default:
                     println("Error: invalid player state: \(currentState)")
@@ -146,6 +156,8 @@ class Player: SKSpriteNode {
                     canFlipGravity = true
                 }
                 else if canFlipGravity {
+                    // Play flip sound
+                    /* *** Placehoder for sound *** */
                     // Flip gravity
                     gravityMultiplier *= -1
                     // Prevent further flips until next jump
