@@ -33,9 +33,9 @@ class MainMenuScene: SKScene {
         alien.currentState = .Running
         self.addChild(alien)
         
-        // Setup label node to display level
+        // Setup label node to display level        
         let levelDisplay = SKLabelNode(fontNamed: "Futura")
-        levelDisplay.text = "Level 1"
+        levelDisplay.text = "Level \(NSUserDefaults.standardUserDefaults().integerForKey(kSelectedLevelKey))"
         levelDisplay.fontColor = SKColor(red: 0.518, green: 0.78, blue: 1.0, alpha: 1.0)
         levelDisplay.fontSize = 15
         levelDisplay.position = CGPointMake(size.width * 0.5, size.height - 195)

@@ -54,15 +54,25 @@ class GameScene: SKScene {
         return position
     }
     
-    func gameOver() {
+    func gameOver(completedLevel: Bool) {
+        if completedLevel {
+            var selectedLevel = NSUserDefaults.standardUserDefaults().integerForKey(kSelectedLevelKey)
+            var highestUnlockedLevel = NSUserDefaults.standardUserDefaults().integerForKey(kHighestUnlockedLevelKey)
+            
+            if selectedLevel == highestUnlockedLevel && kHighestLevel > highestUnlockedLevel {
+                highestUnlockedLevel++
+                NSUserDefaults.standardUserDefaults().setInteger(highestUnlockedLevel, forKey: kHighestUnlockedLevelKey)
+            }
+            if selectedLevel < highestUnlockedLevel {
+                selectedLevel++
+                NSUserDefaults.standardUserDefaults().setInteger(selectedLevel, forKey: kSelectedLevelKey)
+            }
+            NSUserDefaults.standardUserDefaults().synchronize()
+        }
+        
         if let skView = self.view {
             skView.presentScene(MainMenuScene(size: self.size))
         }
-//        player.position = getMarkerPosition("Player")
-//        player.velocity = CGVectorMake(0, 0)
-//        player.gravityMultiplier = 1
-//        player.currentState = .Jumping
-        
     }
     
     override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
@@ -80,9 +90,6 @@ class GameScene: SKScene {
     }
     
     override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
-        if touches.anyObject()?.locationInNode(self).x < 50 {
-            gameOver()
-        }
         player.didJump = false
     }
     
@@ -188,7 +195,7 @@ class GameScene: SKScene {
         if player.targetPosition.y < -player.size.height * 2
             || player.targetPosition.y > (map.mapSize.height * map.tileSize.height) + player.size.height * 2 {
             // Fall outside of the world
-            gameOver()
+            gameOver(false)
         }
         else {
             if player.currentState != .Hurt {
@@ -204,6 +211,11 @@ class GameScene: SKScene {
 
             // Move player
             player.position = player.targetPosition
+            
+            // Check if the player has completed the level
+            if player.position.x - player.size.width > map.mapSize.width * map.tileSize.width {
+                gameOver(true)
+            }
         }
         
         // Update position of camera
@@ -217,6 +229,10 @@ class GameScene: SKScene {
         var y = fmax(camera.position.y, self.frame.size.height * 0.5)
         x = fmin(x, map.mapSize.width * map.tileSize.width - (self.frame.size.width * 0.5))
         y = fmin(y, map.mapSize.height * map.tileSize.height - (self.frame.size.height * 0.5))
+        
+        // Align x and to pixel grid
+        x = round(x * 2) / 2
+        y = round(y * 2) / 2
         
         // Center view on position of camera in the world
         map.position = CGPointMake((self.frame.size.width * 0.5) - x, (self.frame.size.height * 0.5) - y)

@@ -8,6 +8,7 @@
 
 import UIKit
 
+let kHighestLevel = 3
 let kHighestUnlockedLevelKey = "HighestUnlockedLevel"
 let kSelectedLevelKey = "SelectedLevel"
 
@@ -32,10 +33,10 @@ class LevelSelectionScene: SKScene, ButtonDelegate {
         self.addChild(layoutNode)
         
         let buttonDisabledTexture = SKTexture(imageNamed: "LevelLocked")
-        var levelUnlocked = 2
+        var levelUnlocked = NSUserDefaults.standardUserDefaults().integerForKey(kHighestUnlockedLevelKey)
         
         // Add button for levels
-        for var i = 1; i <= 3; i++ {
+        for var i = 1; i <= kHighestLevel; i++ {
             let buttonTexture = SKTexture(imageNamed: "Level\(i)")
             let levelButton = Button(texture: buttonTexture, color: UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 0.0), size: buttonTexture.size(), disableTexture: buttonDisabledTexture)
             levelButton.enabled = i <= levelUnlocked
@@ -55,7 +56,14 @@ class LevelSelectionScene: SKScene, ButtonDelegate {
     }
     
     func buttonPressed(button: Button) {
-        println("Level \(button.name!)")
+        // Save selected level
+        NSUserDefaults.standardUserDefaults().setInteger((button.name! as NSString).integerValue, forKey: kSelectedLevelKey)
+        NSUserDefaults.standardUserDefaults().synchronize()
+        
+        // Switch to main menu
+        if let skView = self.view {
+            skView.presentScene(MainMenuScene(size: self.size), transition: SKTransition.pushWithDirection(SKTransitionDirection.Right, duration: 0.6))
+        }
     }
     
 }

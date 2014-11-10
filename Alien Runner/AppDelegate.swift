@@ -16,6 +16,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        
+        if let path = NSBundle.mainBundle().pathForResource("UserDefaults", ofType: "plist") {
+            if let defaults = NSDictionary(contentsOfFile: path) {
+                NSUserDefaults.standardUserDefaults().registerDefaults(defaults)
+            }
+        }
+        
         return true
     }
 

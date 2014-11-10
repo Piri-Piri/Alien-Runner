@@ -21,7 +21,8 @@ class Player: SKSpriteNode {
     let kMaxSpeed: CGFloat = 3.5
     let kJumpSpeed: CGFloat = 5.5
     let kJumpCutOffSpeed: CGFloat = 2.5
-    let kShowCollisionRect = true
+    
+    let kShowCollisionRect = false
     
     var velocity: CGVector = CGVectorMake(0, 0)
     var targetPosition: CGPoint = CGPointZero
